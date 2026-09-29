@@ -1,7 +1,13 @@
 import { Button, Container, Paper, Stack, Typography } from '@mui/material';
 import { RadioTower } from 'lucide-react';
 
-export const AppShell = () => (
+import { logoutClient } from '../features/auth/authService';
+
+type AppShellProps = {
+  email: string;
+};
+
+export const AppShell = ({ email }: AppShellProps) => (
   <main className="min-h-screen bg-slate-50">
     <Container maxWidth="lg" className="py-8">
       <Paper elevation={0} className="border border-slate-200 p-6">
@@ -10,17 +16,21 @@ export const AppShell = () => (
             <RadioTower size={32} strokeWidth={1.8} />
             <div>
               <Typography variant="h5" component="h1" fontWeight={700}>
-                Broadcast SaaS
+                SendFlow
               </Typography>
               <Typography color="text.secondary">
-                Estrutura inicial pronta para Auth, conexoes, contatos e mensagens.
+                Conectado como {email}
               </Typography>
             </div>
           </Stack>
 
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-            <Button variant="contained">Entrar</Button>
-            <Button variant="outlined">Criar conta</Button>
+            <Button variant="contained">Conexoes</Button>
+            <Button variant="outlined">Contatos</Button>
+            <Button variant="outlined">Broadcast</Button>
+            <Button variant="text" color="inherit" onClick={logoutClient}>
+              Sair
+            </Button>
           </Stack>
         </Stack>
       </Paper>
