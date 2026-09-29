@@ -1,31 +1,21 @@
 import { Alert, Button, Paper, Stack, TextField, Typography } from '@mui/material';
-import { LogIn, UserPlus } from 'lucide-react';
+import { UserPlus } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
-import { loginClient, registerClient } from './authService';
+import {
+  accountCreatedMessage,
+  accountCreatedMessageKey,
+  getAuthErrorMessage,
+} from '../domain/authFeedback';
+import { registerClient } from '../infrastructure/authService';
 
-type AuthMode = 'login' | 'register';
-
-const authErrorMessages: Record<string, string> = {
-  'auth/email-already-in-use': 'Este email ja esta cadastrado.',
-  'auth/invalid-credential': 'Email ou senha invalidos.',
-  'auth/invalid-email': 'Informe um email valido.',
-  'auth/weak-password': 'A senha deve ter pelo menos 6 caracteres.',
-};
-
-const getAuthErrorMessage = (error: unknown) => {
-  const code = typeof error === 'object' && error && 'code' in error ? String(error.code) : '';
-  return authErrorMessages[code] ?? 'Nao foi possivel concluir a autenticacao.';
-};
-
-export const AuthPage = () => {
-  const [mode, setMode] = useState<AuthMode>('login');
+export const RegisterPage = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
-
-  const isLogin = mode === 'login';
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -33,11 +23,9 @@ export const AuthPage = () => {
     setError('');
 
     try {
-      if (isLogin) {
-        await loginClient(email, password);
-      } else {
-        await registerClient(email, password);
-      }
+      await registerClient(email, password);
+      window.sessionStorage.setItem(accountCreatedMessageKey, accountCreatedMessage);
+      navigate('/auth/login', { replace: true });
     } catch (authError) {
       setError(getAuthErrorMessage(authError));
     } finally {
@@ -53,9 +41,7 @@ export const AuthPage = () => {
             <Typography variant="h4" component="h1" fontWeight={700}>
               SendFlow
             </Typography>
-            <Typography color="text.secondary">
-              {isLogin ? 'Entre para gerenciar seus broadcasts.' : 'Crie sua conta para comecar.'}
-            </Typography>
+            <Typography color="text.secondary">Crie sua conta para comecar.</Typography>
           </div>
 
           <Stack component="form" spacing={2} onSubmit={handleSubmit}>
@@ -84,14 +70,14 @@ export const AuthPage = () => {
               variant="contained"
               size="large"
               disabled={submitting}
-              startIcon={isLogin ? <LogIn size={18} /> : <UserPlus size={18} />}
+              startIcon={<UserPlus size={18} />}
             >
-              {submitting ? 'Aguarde...' : isLogin ? 'Entrar' : 'Criar conta'}
+              {submitting ? 'Aguarde...' : 'Criar conta'}
             </Button>
           </Stack>
 
-          <Button variant="text" onClick={() => setMode(isLogin ? 'register' : 'login')}>
-            {isLogin ? 'Criar uma nova conta' : 'Ja tenho uma conta'}
+          <Button component={Link} to="/auth/login" variant="text">
+            Ja tenho uma conta
           </Button>
         </Stack>
       </Paper>
