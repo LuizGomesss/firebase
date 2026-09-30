@@ -1,8 +1,10 @@
 import { type FormEvent, useState } from 'react';
 
-import { useAuth } from '../../auth/infrastructure/useAuth';
-import type { Connection } from '../../shared/domain';
-import { createConnection, deleteConnection, updateConnection } from './connectionsService';
+import { useAuth } from '../../../auth/infrastructure/hooks/useAuth';
+import type { Connection } from '../../../shared/domain';
+import { createConnection } from '../services/createConnection';
+import { deleteConnection } from '../services/deleteConnection';
+import { updateConnection } from '../services/updateConnection';
 import { useConnections } from './useConnections';
 
 export const useConnectionsPage = () => {

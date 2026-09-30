@@ -21,13 +21,8 @@ import {
 } from '@mui/material';
 import { Edit2, Plus, Save, Trash2, X } from 'lucide-react';
 
-import { useConnectionsPage } from '../infrastructure/useConnectionsPage';
-
-const formatDate = (date: Date) =>
-  new Intl.DateTimeFormat('pt-BR', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  }).format(date);
+import { useConnectionsPage } from '../infrastructure/hooks/useConnectionsPage';
+import { formatDate } from '../../shared';
 
 export const ConnectionsPage = () => {
   const page = useConnectionsPage();

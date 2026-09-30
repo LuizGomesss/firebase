@@ -24,18 +24,9 @@ import {
 } from '@mui/material';
 import { Edit2, Save, Trash2, X } from 'lucide-react';
 
-import { type MessageFilter, useMessagesPage } from '../infrastructure/useMessagesPage';
-
-const formatDate = (date: Date | null) => {
-  if (!date) {
-    return '-';
-  }
-
-  return new Intl.DateTimeFormat('pt-BR', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  }).format(date);
-};
+import { formatDate } from '../../shared';
+import type { MessageFilter } from '../infrastructure/hooks/messageFilter';
+import { useMessagesPage } from '../infrastructure/hooks/useMessagesPage';
 
 export const MessagesPage = () => {
   const page = useMessagesPage();

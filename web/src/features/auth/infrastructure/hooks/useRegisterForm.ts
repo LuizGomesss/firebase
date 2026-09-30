@@ -5,8 +5,8 @@ import {
   accountCreatedMessage,
   accountCreatedMessageKey,
   getAuthErrorMessage,
-} from '../domain/authFeedback';
-import { registerClient } from './authService';
+} from '../../domain/authFeedback';
+import { registerClient } from '../services/registerClient';
 
 export const useRegisterForm = () => {
   const navigate = useNavigate();

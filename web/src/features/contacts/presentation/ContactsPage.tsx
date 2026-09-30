@@ -25,13 +25,8 @@ import {
 } from '@mui/material';
 import { Edit2, Plus, Save, Trash2, X } from 'lucide-react';
 
-import { useContactsPage } from '../infrastructure/useContactsPage';
-
-const formatDate = (date: Date) =>
-  new Intl.DateTimeFormat('pt-BR', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  }).format(date);
+import { useContactsPage } from '../infrastructure/hooks/useContactsPage';
+import { formatDate } from '../../shared';
 
 export const ContactsPage = () => {
   const page = useContactsPage();

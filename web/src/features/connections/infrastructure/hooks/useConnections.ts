@@ -1,24 +1,24 @@
 import { useEffect, useState } from 'react';
 
-import type { Contact } from '../../shared/domain';
-import { subscribeToContacts } from './contactsService';
+import type { Connection } from '../../../shared/domain';
+import { subscribeToConnections } from '../services/subscribeToConnections';
 
-type ContactsState = {
-  contacts: Contact[];
+type ConnectionsState = {
+  connections: Connection[];
   loading: boolean;
   error: string;
 };
 
-export const useContacts = (clientId: string | undefined, connectionId: string): ContactsState => {
-  const [state, setState] = useState<ContactsState>({
-    contacts: [],
-    loading: Boolean(clientId && connectionId),
+export const useConnections = (clientId: string | undefined): ConnectionsState => {
+  const [state, setState] = useState<ConnectionsState>({
+    connections: [],
+    loading: Boolean(clientId),
     error: '',
   });
 
   useEffect(() => {
-    if (!clientId || !connectionId) {
-      setState({ contacts: [], loading: false, error: '' });
+    if (!clientId) {
+      setState({ connections: [], loading: false, error: '' });
       return undefined;
     }
 
@@ -28,7 +28,7 @@ export const useContacts = (clientId: string | undefined, connectionId: string):
       setState((currentState) =>
         currentState.loading
           ? {
-              contacts: [],
+              connections: [],
               loading: false,
               error:
                 'O Firestore demorou para responder. Verifique se o banco foi criado e se as regras foram publicadas.',
@@ -37,19 +37,18 @@ export const useContacts = (clientId: string | undefined, connectionId: string):
       );
     }, 8000);
 
-    const unsubscribe = subscribeToContacts(
+    const unsubscribe = subscribeToConnections(
       clientId,
-      connectionId,
-      (contacts) => {
+      (connections) => {
         window.clearTimeout(timeoutId);
-        setState({ contacts, loading: false, error: '' });
+        setState({ connections, loading: false, error: '' });
       },
       (error) => {
         window.clearTimeout(timeoutId);
         setState({
-          contacts: [],
+          connections: [],
           loading: false,
-          error: `Nao foi possivel carregar os contatos. ${error.message}`,
+          error: `Nao foi possivel carregar as conexoes. ${error.message}`,
         });
       },
     );
@@ -58,7 +57,7 @@ export const useContacts = (clientId: string | undefined, connectionId: string):
       window.clearTimeout(timeoutId);
       unsubscribe();
     };
-  }, [clientId, connectionId]);
+  }, [clientId]);
 
   return state;
 };

@@ -1,24 +1,24 @@
 import { useEffect, useState } from 'react';
 
-import type { BroadcastMessage, MessageStatus } from '../../shared/domain';
-import { subscribeToMessages } from './messagesService';
+import type { Contact } from '../../../shared/domain';
+import { subscribeToContacts } from '../services/subscribeToContacts';
 
-type MessagesState = {
-  messages: BroadcastMessage[];
+type ContactsState = {
+  contacts: Contact[];
   loading: boolean;
   error: string;
 };
 
-export const useMessages = (clientId: string | undefined, status: MessageStatus | 'all'): MessagesState => {
-  const [state, setState] = useState<MessagesState>({
-    messages: [],
-    loading: Boolean(clientId),
+export const useContacts = (clientId: string | undefined, connectionId: string): ContactsState => {
+  const [state, setState] = useState<ContactsState>({
+    contacts: [],
+    loading: Boolean(clientId && connectionId),
     error: '',
   });
 
   useEffect(() => {
-    if (!clientId) {
-      setState({ messages: [], loading: false, error: '' });
+    if (!clientId || !connectionId) {
+      setState({ contacts: [], loading: false, error: '' });
       return undefined;
     }
 
@@ -28,7 +28,7 @@ export const useMessages = (clientId: string | undefined, status: MessageStatus 
       setState((currentState) =>
         currentState.loading
           ? {
-              messages: [],
+              contacts: [],
               loading: false,
               error:
                 'O Firestore demorou para responder. Verifique se o banco foi criado e se as regras foram publicadas.',
@@ -37,19 +37,19 @@ export const useMessages = (clientId: string | undefined, status: MessageStatus 
       );
     }, 8000);
 
-    const unsubscribe = subscribeToMessages(
+    const unsubscribe = subscribeToContacts(
       clientId,
-      status,
-      (messages) => {
+      connectionId,
+      (contacts) => {
         window.clearTimeout(timeoutId);
-        setState({ messages, loading: false, error: '' });
+        setState({ contacts, loading: false, error: '' });
       },
       (error) => {
         window.clearTimeout(timeoutId);
         setState({
-          messages: [],
+          contacts: [],
           loading: false,
-          error: `Nao foi possivel carregar as mensagens. ${error.message}`,
+          error: `Nao foi possivel carregar os contatos. ${error.message}`,
         });
       },
     );
@@ -58,7 +58,7 @@ export const useMessages = (clientId: string | undefined, status: MessageStatus 
       window.clearTimeout(timeoutId);
       unsubscribe();
     };
-  }, [clientId, status]);
+  }, [clientId, connectionId]);
 
   return state;
 };

@@ -1,7 +1,7 @@
 import { type FormEvent, useEffect, useState } from 'react';
 
-import { accountCreatedMessageKey, getAuthErrorMessage } from '../domain/authFeedback';
-import { loginClient } from './authService';
+import { accountCreatedMessageKey, getAuthErrorMessage } from '../../domain/authFeedback';
+import { loginClient } from '../services/loginClient';
 
 export const useLoginForm = () => {
   const [email, setEmail] = useState('');

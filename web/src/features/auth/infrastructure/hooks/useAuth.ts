@@ -1,7 +1,7 @@
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { useEffect, useState } from 'react';
 
-import { auth } from '../../shared/infrastructure/firebase';
+import { auth } from '../../../shared/infrastructure/firebase';
 
 type AuthState = {
   user: User | null;

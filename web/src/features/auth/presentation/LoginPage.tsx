@@ -2,7 +2,7 @@ import { Alert, Button, Paper, Stack, TextField, Typography } from '@mui/materia
 import { LogIn } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-import { useLoginForm } from '../infrastructure/useLoginForm';
+import { useLoginForm } from '../infrastructure/hooks/useLoginForm';
 
 export const LoginPage = () => {
   const form = useLoginForm();

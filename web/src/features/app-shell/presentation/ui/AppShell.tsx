@@ -2,7 +2,7 @@ import { Button, Container, Paper, Stack, Typography } from '@mui/material';
 import { RadioTower } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router-dom';
 
-import { logoutClient } from '../../../auth/infrastructure/authService';
+import { logoutClient } from '../../../auth/infrastructure/services/logoutClient';
 
 type AppShellProps = {
   email: string;

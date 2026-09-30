@@ -1,24 +1,25 @@
 import { useEffect, useState } from 'react';
 
-import type { Connection } from '../../shared/domain';
-import { subscribeToConnections } from './connectionsService';
+import type { BroadcastMessage } from '../../domain/broadcastMessage';
+import type { MessageStatus } from '../../domain/messageStatus';
+import { subscribeToMessages } from '../services/subscribeToMessages';
 
-type ConnectionsState = {
-  connections: Connection[];
+type MessagesState = {
+  messages: BroadcastMessage[];
   loading: boolean;
   error: string;
 };
 
-export const useConnections = (clientId: string | undefined): ConnectionsState => {
-  const [state, setState] = useState<ConnectionsState>({
-    connections: [],
+export const useMessages = (clientId: string | undefined, status: MessageStatus | 'all'): MessagesState => {
+  const [state, setState] = useState<MessagesState>({
+    messages: [],
     loading: Boolean(clientId),
     error: '',
   });
 
   useEffect(() => {
     if (!clientId) {
-      setState({ connections: [], loading: false, error: '' });
+      setState({ messages: [], loading: false, error: '' });
       return undefined;
     }
 
@@ -28,7 +29,7 @@ export const useConnections = (clientId: string | undefined): ConnectionsState =
       setState((currentState) =>
         currentState.loading
           ? {
-              connections: [],
+              messages: [],
               loading: false,
               error:
                 'O Firestore demorou para responder. Verifique se o banco foi criado e se as regras foram publicadas.',
@@ -37,18 +38,19 @@ export const useConnections = (clientId: string | undefined): ConnectionsState =
       );
     }, 8000);
 
-    const unsubscribe = subscribeToConnections(
+    const unsubscribe = subscribeToMessages(
       clientId,
-      (connections) => {
+      status,
+      (messages) => {
         window.clearTimeout(timeoutId);
-        setState({ connections, loading: false, error: '' });
+        setState({ messages, loading: false, error: '' });
       },
       (error) => {
         window.clearTimeout(timeoutId);
         setState({
-          connections: [],
+          messages: [],
           loading: false,
-          error: `Nao foi possivel carregar as conexoes. ${error.message}`,
+          error: `Nao foi possivel carregar as mensagens. ${error.message}`,
         });
       },
     );
@@ -57,7 +59,7 @@ export const useConnections = (clientId: string | undefined): ConnectionsState =
       window.clearTimeout(timeoutId);
       unsubscribe();
     };
-  }, [clientId]);
+  }, [clientId, status]);
 
   return state;
 };

@@ -2,7 +2,7 @@ import { Alert, Button, Paper, Stack, TextField, Typography } from '@mui/materia
 import { UserPlus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-import { useRegisterForm } from '../infrastructure/useRegisterForm';
+import { useRegisterForm } from '../infrastructure/hooks/useRegisterForm';
 
 export const RegisterPage = () => {
   const form = useRegisterForm();

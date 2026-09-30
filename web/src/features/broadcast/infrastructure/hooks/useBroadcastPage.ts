@@ -1,11 +1,10 @@
 import { type FormEvent, useEffect, useState } from 'react';
 
-import { useAuth } from '../../auth/infrastructure/useAuth';
-import { useConnections } from '../../connections/infrastructure/useConnections';
-import { useContacts } from '../../contacts/infrastructure/useContacts';
-import { createBroadcastMessage } from '../../messages/infrastructure/messagesService';
-
-export type SendMode = 'now' | 'scheduled';
+import { useAuth } from '../../../auth/infrastructure/hooks/useAuth';
+import { useConnections } from '../../../connections/infrastructure/hooks/useConnections';
+import { useContacts } from '../../../contacts/infrastructure/hooks/useContacts';
+import { createBroadcastMessage } from '../../../messages/infrastructure/services/createBroadcastMessage';
+import type { SendMode } from '../../domain/sendMode';
 
 export const useBroadcastPage = () => {
   const { user } = useAuth();

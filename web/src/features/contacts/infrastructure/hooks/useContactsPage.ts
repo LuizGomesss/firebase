@@ -1,9 +1,11 @@
 import { type FormEvent, useEffect, useState } from 'react';
 
-import { useAuth } from '../../auth/infrastructure/useAuth';
-import type { Contact } from '../../shared/domain';
-import { useConnections } from '../../connections/infrastructure/useConnections';
-import { createContact, deleteContact, updateContact } from './contactsService';
+import { useAuth } from '../../../auth/infrastructure/hooks/useAuth';
+import { useConnections } from '../../../connections/infrastructure/hooks/useConnections';
+import type { Contact } from '../../../shared/domain';
+import { createContact } from '../services/createContact';
+import { deleteContact } from '../services/deleteContact';
+import { updateContact } from '../services/updateContact';
 import { useContacts } from './useContacts';
 
 export const useContactsPage = () => {

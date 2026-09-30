@@ -18,7 +18,8 @@ import {
 } from '@mui/material';
 import { CalendarClock, Send } from 'lucide-react';
 
-import { type SendMode, useBroadcastPage } from '../infrastructure/useBroadcastPage';
+import type { SendMode } from '../domain/sendMode';
+import { useBroadcastPage } from '../infrastructure/hooks/useBroadcastPage';
 
 export const BroadcastPage = () => {
   const page = useBroadcastPage();

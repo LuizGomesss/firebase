@@ -1,12 +1,12 @@
 import { useState } from 'react';
 
-import { useAuth } from '../../auth/infrastructure/useAuth';
-import type { BroadcastMessage, MessageStatus } from '../../shared/domain';
-import { useConnections } from '../../connections/infrastructure/useConnections';
-import { deleteBroadcastMessage, updateBroadcastMessage } from './messagesService';
+import { useAuth } from '../../../auth/infrastructure/hooks/useAuth';
+import { useConnections } from '../../../connections/infrastructure/hooks/useConnections';
+import type { BroadcastMessage } from '../../domain/broadcastMessage';
+import { deleteBroadcastMessage } from '../services/deleteBroadcastMessage';
+import { updateBroadcastMessage } from '../services/updateBroadcastMessage';
+import type { MessageFilter } from './messageFilter';
 import { useMessages } from './useMessages';
-
-export type MessageFilter = MessageStatus | 'all';
 
 const toDateTimeLocalValue = (date: Date | null) => {
   if (!date) {

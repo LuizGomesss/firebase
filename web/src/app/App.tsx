@@ -2,7 +2,7 @@ import { CircularProgress, CssBaseline, ThemeProvider } from '@mui/material';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { theme } from './theme';
-import { useAuth } from '../features/auth/infrastructure/useAuth';
+import { useAuth } from '../features/auth/infrastructure/hooks/useAuth';
 import { LoginPage } from '../features/auth/presentation/LoginPage';
 import { RegisterPage } from '../features/auth/presentation/RegisterPage';
 import { AppShell } from '../features/app-shell/presentation/ui/AppShell';
