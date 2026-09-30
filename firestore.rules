@@ -20,17 +20,20 @@ service cloud.firestore {
     }
 
     match /connections/{connectionId} {
-      allow read, update, delete: if ownsTenantData();
+      allow read, delete: if ownsTenantData();
+      allow update: if ownsTenantData() && writesOwnTenantData();
       allow create: if writesOwnTenantData();
     }
 
     match /contacts/{contactId} {
-      allow read, update, delete: if ownsTenantData();
+      allow read, delete: if ownsTenantData();
+      allow update: if ownsTenantData() && writesOwnTenantData();
       allow create: if writesOwnTenantData();
     }
 
     match /messages/{messageId} {
-      allow read, update, delete: if ownsTenantData();
+      allow read, delete: if ownsTenantData();
+      allow update: if ownsTenantData() && writesOwnTenantData();
       allow create: if writesOwnTenantData();
     }
   }

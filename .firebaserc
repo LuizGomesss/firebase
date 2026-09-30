@@ -1,5 +1,7 @@
 {
   "projects": {
     "default": "sendflow-54248"
-  }
+  },
+  "targets": {},
+  "etags": {}
 }
