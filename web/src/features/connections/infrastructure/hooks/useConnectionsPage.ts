@@ -1,21 +1,33 @@
-import { type FormEvent, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import type { FormEvent } from 'react';
 
 import { useAuth } from '../../../auth/infrastructure/hooks/useAuth';
-import type { Connection } from '../../../shared/domain';
 import { createConnection } from '../services/createConnection';
 import { deleteConnection } from '../services/deleteConnection';
 import { updateConnection } from '../services/updateConnection';
+import { useConnectionsPageStore } from '../stores/useConnectionsPageStore';
 import { useConnections } from './useConnections';
 
 export const useConnectionsPage = () => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const { connections, loading, error } = useConnections(user?.uid);
-  const [newConnectionName, setNewConnectionName] = useState('');
-  const [editingConnection, setEditingConnection] = useState<Connection | null>(null);
-  const [editingName, setEditingName] = useState('');
-  const [deletingConnection, setDeletingConnection] = useState<Connection | null>(null);
-  const [formError, setFormError] = useState('');
-  const [submitting, setSubmitting] = useState(false);
+  const {
+    newConnectionName,
+    editingConnection,
+    editingName,
+    deletingConnection,
+    formError,
+    submitting,
+    setNewConnectionName,
+    setEditingName,
+    setDeletingConnection,
+    setFormError,
+    setSubmitting,
+    openEditDialog,
+    closeEditDialog,
+    clearCreateForm,
+  } = useConnectionsPageStore();
 
   const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -36,24 +48,13 @@ export const useConnectionsPage = () => {
 
     try {
       await createConnection(user.uid, name);
-      setNewConnectionName('');
+      await queryClient.invalidateQueries({ queryKey: ['connections', user.uid] });
+      clearCreateForm();
     } catch {
       setFormError('Nao foi possivel criar a conexao.');
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const openEditDialog = (connection: Connection) => {
-    setEditingConnection(connection);
-    setEditingName(connection.name);
-    setFormError('');
-  };
-
-  const closeEditDialog = () => {
-    setEditingConnection(null);
-    setEditingName('');
-    setFormError('');
   };
 
   const handleUpdate = async () => {
@@ -69,6 +70,7 @@ export const useConnectionsPage = () => {
 
     try {
       await updateConnection(editingConnection.id, name);
+      await queryClient.invalidateQueries({ queryKey: ['connections', user?.uid] });
       closeEditDialog();
     } catch {
       setFormError('Nao foi possivel editar a conexao.');
@@ -87,6 +89,7 @@ export const useConnectionsPage = () => {
 
     try {
       await deleteConnection(deletingConnection.id);
+      await queryClient.invalidateQueries({ queryKey: ['connections', user?.uid] });
       setDeletingConnection(null);
     } catch {
       setFormError('Nao foi possivel excluir a conexao.');

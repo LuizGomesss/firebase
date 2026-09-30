@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -7,13 +7,11 @@ import {
   getAuthErrorMessage,
 } from '../../domain/authFeedback';
 import { registerClient } from '../services/registerClient';
+import { useRegisterFormStore } from '../stores/useRegisterFormStore';
 
 export const useRegisterForm = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [submitting, setSubmitting] = useState(false);
+  const { email, password, error, submitting, setEmail, setPassword, setError, setSubmitting } = useRegisterFormStore();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

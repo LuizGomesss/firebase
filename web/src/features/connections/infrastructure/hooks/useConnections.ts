@@ -1,63 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
-import type { Connection } from '../../../shared/domain';
-import { subscribeToConnections } from '../services/subscribeToConnections';
+import { fetchConnections } from '../services/fetchConnections';
 
-type ConnectionsState = {
-  connections: Connection[];
-  loading: boolean;
-  error: string;
-};
-
-export const useConnections = (clientId: string | undefined): ConnectionsState => {
-  const [state, setState] = useState<ConnectionsState>({
-    connections: [],
-    loading: Boolean(clientId),
-    error: '',
+export const useConnections = (clientId: string | undefined) => {
+  const query = useQuery({
+    queryKey: ['connections', clientId],
+    queryFn: () => fetchConnections(clientId ?? ''),
+    enabled: Boolean(clientId),
+    initialData: [],
   });
 
-  useEffect(() => {
-    if (!clientId) {
-      setState({ connections: [], loading: false, error: '' });
-      return undefined;
-    }
-
-    setState((currentState) => ({ ...currentState, loading: true, error: '' }));
-
-    const timeoutId = window.setTimeout(() => {
-      setState((currentState) =>
-        currentState.loading
-          ? {
-              connections: [],
-              loading: false,
-              error:
-                'O Firestore demorou para responder. Verifique se o banco foi criado e se as regras foram publicadas.',
-            }
-          : currentState,
-      );
-    }, 8000);
-
-    const unsubscribe = subscribeToConnections(
-      clientId,
-      (connections) => {
-        window.clearTimeout(timeoutId);
-        setState({ connections, loading: false, error: '' });
-      },
-      (error) => {
-        window.clearTimeout(timeoutId);
-        setState({
-          connections: [],
-          loading: false,
-          error: `Nao foi possivel carregar as conexoes. ${error.message}`,
-        });
-      },
-    );
-
-    return () => {
-      window.clearTimeout(timeoutId);
-      unsubscribe();
-    };
-  }, [clientId]);
-
-  return state;
+  return {
+    connections: query.data,
+    loading: query.isFetching,
+    error: query.error ? 'Nao foi possivel carregar as conexoes.' : '',
+  };
 };

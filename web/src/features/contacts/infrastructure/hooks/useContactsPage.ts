@@ -1,36 +1,43 @@
-import { type FormEvent, useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import type { FormEvent } from 'react';
 
 import { useAuth } from '../../../auth/infrastructure/hooks/useAuth';
 import { useConnections } from '../../../connections/infrastructure/hooks/useConnections';
-import type { Contact } from '../../../shared/domain';
 import { createContact } from '../services/createContact';
 import { deleteContact } from '../services/deleteContact';
 import { updateContact } from '../services/updateContact';
+import { useContactsPageStore } from '../stores/useContactsPageStore';
 import { useContacts } from './useContacts';
 
 export const useContactsPage = () => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const { connections, loading: loadingConnections, error: connectionsError } = useConnections(user?.uid);
-  const [selectedConnectionId, setSelectedConnectionId] = useState('');
+  const {
+    selectedConnectionId: storedSelectedConnectionId,
+    newContactName,
+    newContactPhone,
+    editingContact,
+    editingName,
+    editingPhone,
+    deletingContact,
+    formError,
+    submitting,
+    setSelectedConnectionId,
+    setNewContactName,
+    setNewContactPhone,
+    setEditingName,
+    setEditingPhone,
+    setDeletingContact,
+    setFormError,
+    setSubmitting,
+    openEditDialog,
+    closeEditDialog,
+    clearCreateForm,
+  } = useContactsPageStore();
+  const selectedConnectionExists = connections.some((connection) => connection.id === storedSelectedConnectionId);
+  const selectedConnectionId = selectedConnectionExists ? storedSelectedConnectionId : connections[0]?.id ?? '';
   const { contacts, loading: loadingContacts, error: contactsError } = useContacts(user?.uid, selectedConnectionId);
-  const [newContactName, setNewContactName] = useState('');
-  const [newContactPhone, setNewContactPhone] = useState('');
-  const [editingContact, setEditingContact] = useState<Contact | null>(null);
-  const [editingName, setEditingName] = useState('');
-  const [editingPhone, setEditingPhone] = useState('');
-  const [deletingContact, setDeletingContact] = useState<Contact | null>(null);
-  const [formError, setFormError] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (!selectedConnectionId && connections.length > 0) {
-      setSelectedConnectionId(connections[0].id);
-    }
-
-    if (selectedConnectionId && connections.every((connection) => connection.id !== selectedConnectionId)) {
-      setSelectedConnectionId(connections[0]?.id ?? '');
-    }
-  }, [connections, selectedConnectionId]);
 
   const selectedConnection = connections.find((connection) => connection.id === selectedConnectionId);
   const hasConnections = connections.length > 0;
@@ -60,27 +67,13 @@ export const useContactsPage = () => {
         name,
         phone,
       });
-      setNewContactName('');
-      setNewContactPhone('');
+      await queryClient.invalidateQueries({ queryKey: ['contacts', user.uid, selectedConnectionId] });
+      clearCreateForm();
     } catch {
       setFormError('Nao foi possivel criar o contato.');
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const openEditDialog = (contact: Contact) => {
-    setEditingContact(contact);
-    setEditingName(contact.name);
-    setEditingPhone(contact.phone);
-    setFormError('');
-  };
-
-  const closeEditDialog = () => {
-    setEditingContact(null);
-    setEditingName('');
-    setEditingPhone('');
-    setFormError('');
   };
 
   const handleUpdate = async () => {
@@ -97,6 +90,7 @@ export const useContactsPage = () => {
 
     try {
       await updateContact(editingContact.id, { name, phone });
+      await queryClient.invalidateQueries({ queryKey: ['contacts', user?.uid, selectedConnectionId] });
       closeEditDialog();
     } catch {
       setFormError('Nao foi possivel editar o contato.');
@@ -115,6 +109,7 @@ export const useContactsPage = () => {
 
     try {
       await deleteContact(deletingContact.id);
+      await queryClient.invalidateQueries({ queryKey: ['contacts', user?.uid, selectedConnectionId] });
       setDeletingContact(null);
     } catch {
       setFormError('Nao foi possivel excluir o contato.');

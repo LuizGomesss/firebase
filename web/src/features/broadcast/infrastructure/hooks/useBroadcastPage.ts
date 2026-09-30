@@ -1,45 +1,48 @@
-import { type FormEvent, useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 
 import { useAuth } from '../../../auth/infrastructure/hooks/useAuth';
-import { useConnections } from '../../../connections/infrastructure/hooks/useConnections';
-import { useContacts } from '../../../contacts/infrastructure/hooks/useContacts';
 import { createBroadcastMessage } from '../../../messages/infrastructure/services/createBroadcastMessage';
-import type { SendMode } from '../../domain/sendMode';
+import { useBroadcastPageStore } from '../stores/useBroadcastPageStore';
+import { useBroadcastConnectionsQuery } from './useBroadcastConnectionsQuery';
+import { useBroadcastContactsQuery } from './useBroadcastContactsQuery';
 
 export const useBroadcastPage = () => {
   const { user } = useAuth();
-  const { connections, loading: loadingConnections, error: connectionsError } = useConnections(user?.uid);
-  const [selectedConnectionId, setSelectedConnectionId] = useState('');
-  const { contacts, loading: loadingContacts, error: contactsError } = useContacts(user?.uid, selectedConnectionId);
-  const [selectedContactIds, setSelectedContactIds] = useState<string[]>([]);
-  const [text, setText] = useState('');
-  const [sendMode, setSendMode] = useState<SendMode>('now');
-  const [scheduledAt, setScheduledAt] = useState('');
-  const [formError, setFormError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [submitting, setSubmitting] = useState(false);
+  const {
+    selectedConnectionId: storedSelectedConnectionId,
+    selectedContactIds,
+    text,
+    sendMode,
+    scheduledAt,
+    formError,
+    successMessage,
+    submitting,
+    setSelectedConnectionId,
+    setSelectedContactIds,
+    setText,
+    setSendMode,
+    setScheduledAt,
+    setFormError,
+    setSuccessMessage,
+    setSubmitting,
+    resetForm,
+  } = useBroadcastPageStore();
 
-  useEffect(() => {
-    if (!selectedConnectionId && connections.length > 0) {
-      setSelectedConnectionId(connections[0].id);
-    }
-
-    if (selectedConnectionId && connections.every((connection) => connection.id !== selectedConnectionId)) {
-      setSelectedConnectionId(connections[0]?.id ?? '');
-    }
-  }, [connections, selectedConnectionId]);
-
-  useEffect(() => {
-    setSelectedContactIds((currentIds) =>
-      currentIds.filter((contactId) => contacts.some((contact) => contact.id === contactId)),
-    );
-  }, [contacts]);
+  const connectionsQuery = useBroadcastConnectionsQuery(user?.uid);
+  const connections = connectionsQuery.data;
+  const selectedConnectionExists = connections.some((connection) => connection.id === storedSelectedConnectionId);
+  const selectedConnectionId = selectedConnectionExists ? storedSelectedConnectionId : connections[0]?.id ?? '';
+  const contactsQuery = useBroadcastContactsQuery(user?.uid, selectedConnectionId);
+  const contacts = contactsQuery.data;
+  const validSelectedContactIds = selectedContactIds.filter((contactId) =>
+    contacts.some((contact) => contact.id === contactId),
+  );
 
   const toggleContact = (contactId: string) => {
-    setSelectedContactIds((currentIds) =>
-      currentIds.includes(contactId)
-        ? currentIds.filter((currentContactId) => currentContactId !== contactId)
-        : [...currentIds, contactId],
+    setSelectedContactIds(
+      validSelectedContactIds.includes(contactId)
+        ? validSelectedContactIds.filter((currentContactId) => currentContactId !== contactId)
+        : [...validSelectedContactIds, contactId],
     );
   };
 
@@ -61,7 +64,7 @@ export const useBroadcastPage = () => {
     const messageText = text.trim();
     const scheduledDate = sendMode === 'scheduled' ? new Date(scheduledAt) : null;
 
-    if (selectedContactIds.length === 0) {
+    if (validSelectedContactIds.length === 0) {
       setFormError('Selecione pelo menos um contato.');
       return;
     }
@@ -84,15 +87,12 @@ export const useBroadcastPage = () => {
       await createBroadcastMessage({
         clientId: user.uid,
         connectionId: selectedConnectionId,
-        contactIds: selectedContactIds,
+        contactIds: validSelectedContactIds,
         text: messageText,
         scheduledAt: scheduledDate,
       });
 
-      setText('');
-      setScheduledAt('');
-      setSelectedContactIds([]);
-      setSendMode('now');
+      resetForm();
       setSuccessMessage(sendMode === 'scheduled' ? 'Mensagem agendada com sucesso.' : 'Mensagem enviada com sucesso.');
     } catch {
       setFormError('Nao foi possivel criar a mensagem.');
@@ -104,13 +104,13 @@ export const useBroadcastPage = () => {
   return {
     connections,
     contacts,
-    loadingConnections,
-    loadingContacts,
-    connectionsError,
-    contactsError,
+    loadingConnections: connectionsQuery.isFetching,
+    loadingContacts: contactsQuery.isFetching,
+    connectionsError: connectionsQuery.error ? 'Nao foi possivel carregar as conexoes.' : '',
+    contactsError: contactsQuery.error ? 'Nao foi possivel carregar os contatos.' : '',
     selectedConnectionId,
     setSelectedConnectionId,
-    selectedContactIds,
+    selectedContactIds: validSelectedContactIds,
     text,
     setText,
     sendMode,

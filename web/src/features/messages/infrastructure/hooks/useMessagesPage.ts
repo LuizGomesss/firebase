@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { useAuth } from '../../../auth/infrastructure/hooks/useAuth';
 import { useConnections } from '../../../connections/infrastructure/hooks/useConnections';
 import type { BroadcastMessage } from '../../domain/broadcastMessage';
 import { deleteBroadcastMessage } from '../services/deleteBroadcastMessage';
 import { updateBroadcastMessage } from '../services/updateBroadcastMessage';
-import type { MessageFilter } from './messageFilter';
+import { useMessagesPageStore } from '../stores/useMessagesPageStore';
 import { useMessages } from './useMessages';
 
 const toDateTimeLocalValue = (date: Date | null) => {
@@ -19,31 +19,32 @@ const toDateTimeLocalValue = (date: Date | null) => {
 
 export const useMessagesPage = () => {
   const { user } = useAuth();
-  const [filter, setFilter] = useState<MessageFilter>('all');
+  const queryClient = useQueryClient();
+  const {
+    filter,
+    editingMessage,
+    editingText,
+    editingScheduledAt,
+    deletingMessage,
+    formError,
+    submitting,
+    setFilter,
+    setEditingText,
+    setEditingScheduledAt,
+    setDeletingMessage,
+    setFormError,
+    setSubmitting,
+    openEditDialog: openEditDialogStore,
+    closeEditDialog,
+  } = useMessagesPageStore();
   const { messages, loading, error } = useMessages(user?.uid, filter);
   const { connections } = useConnections(user?.uid);
-  const [editingMessage, setEditingMessage] = useState<BroadcastMessage | null>(null);
-  const [editingText, setEditingText] = useState('');
-  const [editingScheduledAt, setEditingScheduledAt] = useState('');
-  const [deletingMessage, setDeletingMessage] = useState<BroadcastMessage | null>(null);
-  const [formError, setFormError] = useState('');
-  const [submitting, setSubmitting] = useState(false);
 
   const getConnectionName = (connectionId: string) =>
     connections.find((connection) => connection.id === connectionId)?.name ?? 'Conexao removida';
 
   const openEditDialog = (message: BroadcastMessage) => {
-    setEditingMessage(message);
-    setEditingText(message.text);
-    setEditingScheduledAt(toDateTimeLocalValue(message.status === 'scheduled' ? message.scheduledAt : null));
-    setFormError('');
-  };
-
-  const closeEditDialog = () => {
-    setEditingMessage(null);
-    setEditingText('');
-    setEditingScheduledAt('');
-    setFormError('');
+    openEditDialogStore(message, toDateTimeLocalValue(message.status === 'scheduled' ? message.scheduledAt : null));
   };
 
   const handleUpdate = async () => {
@@ -65,6 +66,7 @@ export const useMessagesPage = () => {
 
     try {
       await updateBroadcastMessage(editingMessage.id, { text, scheduledAt });
+      await queryClient.invalidateQueries({ queryKey: ['messages', user?.uid] });
       closeEditDialog();
     } catch {
       setFormError('Nao foi possivel editar a mensagem.');
@@ -83,6 +85,7 @@ export const useMessagesPage = () => {
 
     try {
       await deleteBroadcastMessage(deletingMessage.id);
+      await queryClient.invalidateQueries({ queryKey: ['messages', user?.uid] });
       setDeletingMessage(null);
     } catch {
       setFormError('Nao foi possivel excluir a mensagem.');

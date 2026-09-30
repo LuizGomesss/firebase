@@ -1,23 +1,12 @@
-import { type FormEvent, useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 
-import { accountCreatedMessageKey, getAuthErrorMessage } from '../../domain/authFeedback';
+import { getAuthErrorMessage } from '../../domain/authFeedback';
 import { loginClient } from '../services/loginClient';
+import { useLoginFormStore } from '../stores/useLoginFormStore';
 
 export const useLoginForm = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    const pendingMessage = window.sessionStorage.getItem(accountCreatedMessageKey);
-
-    if (pendingMessage) {
-      setSuccessMessage(pendingMessage);
-      window.sessionStorage.removeItem(accountCreatedMessageKey);
-    }
-  }, []);
+  const { email, password, error, successMessage, submitting, setEmail, setPassword, setError, setSuccessMessage, setSubmitting } =
+    useLoginFormStore();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
