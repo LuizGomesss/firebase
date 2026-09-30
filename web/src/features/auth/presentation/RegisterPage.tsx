@@ -1,37 +1,11 @@
 import { Alert, Button, Paper, Stack, TextField, Typography } from '@mui/material';
 import { UserPlus } from 'lucide-react';
-import { type FormEvent, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
-import {
-  accountCreatedMessage,
-  accountCreatedMessageKey,
-  getAuthErrorMessage,
-} from '../domain/authFeedback';
-import { registerClient } from '../infrastructure/authService';
+import { useRegisterForm } from '../infrastructure/useRegisterForm';
 
 export const RegisterPage = () => {
-  const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setSubmitting(true);
-    setError('');
-
-    try {
-      await registerClient(email, password);
-      window.sessionStorage.setItem(accountCreatedMessageKey, accountCreatedMessage);
-      navigate('/auth/login', { replace: true });
-    } catch (authError) {
-      setError(getAuthErrorMessage(authError));
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  const form = useRegisterForm();
 
   return (
     <main className="grid min-h-screen place-items-center bg-slate-50 px-4 py-8">
@@ -44,22 +18,22 @@ export const RegisterPage = () => {
             <Typography color="text.secondary">Crie sua conta para comecar.</Typography>
           </div>
 
-          <Stack component="form" spacing={2} onSubmit={handleSubmit}>
-            {error ? <Alert severity="error">{error}</Alert> : null}
+          <Stack component="form" spacing={2} onSubmit={form.handleSubmit}>
+            {form.error ? <Alert severity="error">{form.error}</Alert> : null}
 
             <TextField
               label="Email"
               type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              value={form.email}
+              onChange={(event) => form.setEmail(event.target.value)}
               required
               fullWidth
             />
             <TextField
               label="Senha"
               type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              value={form.password}
+              onChange={(event) => form.setPassword(event.target.value)}
               required
               fullWidth
               inputProps={{ minLength: 6 }}
@@ -69,10 +43,10 @@ export const RegisterPage = () => {
               type="submit"
               variant="contained"
               size="large"
-              disabled={submitting}
+              disabled={form.submitting}
               startIcon={<UserPlus size={18} />}
             >
-              {submitting ? 'Aguarde...' : 'Criar conta'}
+              {form.submitting ? 'Aguarde...' : 'Criar conta'}
             </Button>
           </Stack>
 

@@ -1,40 +1,11 @@
 import { Alert, Button, Paper, Stack, TextField, Typography } from '@mui/material';
 import { LogIn } from 'lucide-react';
-import { type FormEvent, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { accountCreatedMessageKey, getAuthErrorMessage } from '../domain/authFeedback';
-import { loginClient } from '../infrastructure/authService';
+import { useLoginForm } from '../infrastructure/useLoginForm';
 
 export const LoginPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    const pendingMessage = window.sessionStorage.getItem(accountCreatedMessageKey);
-
-    if (pendingMessage) {
-      setSuccessMessage(pendingMessage);
-      window.sessionStorage.removeItem(accountCreatedMessageKey);
-    }
-  }, []);
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setSubmitting(true);
-    setError('');
-
-    try {
-      await loginClient(email, password);
-    } catch (authError) {
-      setError(getAuthErrorMessage(authError));
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  const form = useLoginForm();
 
   return (
     <main className="grid min-h-screen place-items-center bg-slate-50 px-4 py-8">
@@ -47,27 +18,27 @@ export const LoginPage = () => {
             <Typography color="text.secondary">Entre para gerenciar seus broadcasts.</Typography>
           </div>
 
-          <Stack component="form" spacing={2} onSubmit={handleSubmit}>
-            {successMessage ? (
-              <Alert severity="success" onClose={() => setSuccessMessage('')}>
-                {successMessage}
+          <Stack component="form" spacing={2} onSubmit={form.handleSubmit}>
+            {form.successMessage ? (
+              <Alert severity="success" onClose={() => form.setSuccessMessage('')}>
+                {form.successMessage}
               </Alert>
             ) : null}
-            {error ? <Alert severity="error">{error}</Alert> : null}
+            {form.error ? <Alert severity="error">{form.error}</Alert> : null}
 
             <TextField
               label="Email"
               type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              value={form.email}
+              onChange={(event) => form.setEmail(event.target.value)}
               required
               fullWidth
             />
             <TextField
               label="Senha"
               type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              value={form.password}
+              onChange={(event) => form.setPassword(event.target.value)}
               required
               fullWidth
             />
@@ -76,10 +47,10 @@ export const LoginPage = () => {
               type="submit"
               variant="contained"
               size="large"
-              disabled={submitting}
+              disabled={form.submitting}
               startIcon={<LogIn size={18} />}
             >
-              {submitting ? 'Aguarde...' : 'Entrar'}
+              {form.submitting ? 'Aguarde...' : 'Entrar'}
             </Button>
           </Stack>
 

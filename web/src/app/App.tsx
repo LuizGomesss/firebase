@@ -5,11 +5,11 @@ import { theme } from './theme';
 import { useAuth } from '../features/auth/infrastructure/useAuth';
 import { LoginPage } from '../features/auth/presentation/LoginPage';
 import { RegisterPage } from '../features/auth/presentation/RegisterPage';
-import { AppShell } from '../features/broadcast/presentation/ui/AppShell';
+import { AppShell } from '../features/app-shell/presentation/ui/AppShell';
 import { BroadcastPage } from '../features/broadcast/presentation/BroadcastPage';
-import { ConnectionsPage } from '../features/broadcast/presentation/ConnectionsPage';
-import { ContactsPage } from '../features/broadcast/presentation/ContactsPage';
-import { MessagesPage } from '../features/broadcast/presentation/MessagesPage';
+import { ConnectionsPage } from '../features/connections/presentation/ConnectionsPage';
+import { ContactsPage } from '../features/contacts/presentation/ContactsPage';
+import { MessagesPage } from '../features/messages/presentation/MessagesPage';
 
 export const App = () => {
   const { user, loading } = useAuth();

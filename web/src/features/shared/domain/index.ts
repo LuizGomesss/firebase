@@ -1,12 +1,5 @@
 export type MessageStatus = 'scheduled' | 'sent';
 
-export type Client = {
-  id: string;
-  email: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
 export type Connection = {
   id: string;
   clientId: string;
